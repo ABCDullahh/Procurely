@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procurely Pipeline Analysis</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e8e8ed; line-height: 1.6; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+  h1 span { color: #ef4444; }
+  .subtitle { text-align: center; color: #888; font-size: 0.95rem; margin-bottom: 48px; }
+  h2 { font-size: 1.4rem; font-weight: 600; margin: 48px 0 24px; padding-bottom: 8px; border-bottom: 1px solid #222; }
+  h2 .badge { font-size: 0.7rem; padding: 3px 10px; border-radius: 99px; font-weight: 600; vertical-align: middle; margin-left: 8px; }
+  .badge-red { background: #dc262620; color: #ef4444; border: 1px solid #ef444430; }
+  .badge-green { background: #22c55e15; color: #22c55e; border: 1px solid #22c55e30; }
+
+  /* Pipeline Diagram */
+  .pipeline { display: flex; flex-direction: column; gap: 0; position: relative; }
+  .pipeline::before { content: ''; position: absolute; left: 28px; top: 28px; bottom: 28px; width: 2px; background: linear-gradient(180deg, #ef4444, #f97316, #eab308, #22c55e); z-index: 0; }
+  .step { display: flex; gap: 20px; align-items: flex-start; position: relative; z-index: 1; padding: 12px 0; }
+  .step-dot { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+  .step-content { flex: 1; background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 16px 20px; }
+  .step-content h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+  .step-content p { font-size: 0.82rem; color: #888; }
+  .step-time { font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; margin-top: 4px; display: inline-block; }
+  .time-bad { background: #ef444420; color: #ef4444; }
+  .time-ok { background: #eab30820; color: #eab308; }
+  .time-good { background: #22c55e20; color: #22c55e; }
+  .step-issue { font-size: 0.78rem; color: #ef4444; margin-top: 6px; padding: 6px 10px; background: #ef444408; border-left: 2px solid #ef4444; border-radius: 0 6px 6px 0; }
+
+  /* Comparison */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+  @media (max-width: 768px) { .compare { grid-template-columns: 1fr; } }
+  .compare-card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px; padding: 24px; }
+  .compare-card.bad { border-color: #ef444430; }
+  .compare-card.good { border-color: #22c55e30; }
+  .compare-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .compare-card .stat { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1a1a25; font-size: 0.85rem; }
+  .compare-card .stat:last-child { border-bottom: none; }
+  .compare-card .stat-val { font-weight: 600; }
+  .stat-val.red { color: #ef4444; }
+  .stat-val.green { color: #22c55e; }
+  .stat-val.yellow { color: #eab308; }
+
+  /* Flow Diagram */
+  .flow { display: flex; flex-direction: column; gap: 2px; margin: 24px 0; }
+  .flow-row { display: flex; align-items: center; gap: 8px; }
+  .flow-box { padding: 10px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 500; text-align: center; flex: 1; }
+  .flow-arrow { color: #444; font-size: 1.2rem; text-align: center; padding: 2px 0; }
+  .fb-input { background: #1e3a5f; border: 1px solid #2563eb40; color: #93c5fd; }
+  .fb-query { background: #3b1764; border: 1px solid #7c3aed40; color: #c4b5fd; }
+  .fb-search { background: #1a3a2a; border: 1px solid #22c55e30; color: #86efac; }
+  .fb-filter { background: #3a2a1a; border: 1px solid #f9731630; color: #fdba74; }
+  .fb-scrape { background: #1a2a3a; border: 1px solid #0ea5e930; color: #7dd3fc; }
+  .fb-extract { background: #3a1a2a; border: 1px solid #ec489930; color: #f9a8d4; }
+  .fb-output { background: #1a3a1a; border: 1px solid #22c55e40; color: #86efac; }
+  .fb-parallel { display: flex; gap: 8px; flex: 1; }
+  .fb-parallel .flow-box { flex: 1; }
+
+  /* Query Examples */
+  .queries { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
+  @media (max-width: 768px) { .queries { grid-template-columns: 1fr; } }
+  .query-item { padding: 10px 14px; background: #0d0d15; border: 1px solid #1e1e2e; border-radius: 8px; font-size: 0.8rem; font-family: 'Consolas', monospace; }
+  .query-item .tag { font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tag-vendor { background: #22c55e20; color: #22c55e; }
+  .tag-price { background: #eab30820; color: #eab308; }
+  .tag-b2b { background: #3b82f620; color: #60a5fa; }
+  .tag-intl { background: #a855f720; color: #c084fc; }
+
+  /* URL Filter */
+  .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .filter-box { padding: 14px; border-radius: 10px; }
+  .filter-skip { background: #ef444408; border: 1px solid #ef444420; }
+  .filter-keep { background: #22c55e08; border: 1px solid #22c55e20; }
+  .filter-box h4 { font-size: 0.85rem; margin-bottom: 8px; }
+  .filter-box ul { list-style: none; font-size: 0.78rem; color: #888; }
+  .filter-box ul li { padding: 2px 0; }
+  .filter-box ul li::before { content: '✕ '; color: #ef4444; }
+  .filter-keep ul li::before { content: '✓ '; color: #22c55e; }
+
+  /* Batch Extract */
+  .batch-diagram { display: flex; gap: 12px; align-items: center; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+  .batch-group { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+  .batch-pages { display: flex; gap: 3px; }
+  .batch-page { width: 24px; height: 30px; border-radius: 4px; background: #1e1e2e; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #666; }
+  .batch-arrow { font-size: 1.2rem; color: #444; }
+  .batch-llm { padding: 8px 16px; background: #3b176420; border: 1px solid #7c3aed30; border-radius: 8px; font-size: 0.75rem; color: #c4b5fd; }
+  .batch-label { font-size: 0.65rem; color: #555; margin-top: 2px; }
+
+  /* Impact Summary */
+  .impact { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
+  @media (max-width: 768px) { .impact { grid-template-columns: repeat(2, 1fr); } }
+  .impact-card { text-align: center; padding: 20px 12px; background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; }
+  .impact-card .val { font-size: 1.8rem; font-weight: 700; }
+  .impact-card .label { font-size: 0.75rem; color: #666; margin-top: 4px; }
+  .impact-card .change { font-size: 0.7rem; margin-top: 6px; padding: 2px 8px; border-radius: 99px; display: inline-block; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Procurely Pipeline <span>Analysis</span></h1>
+<p class="subtitle">Vendor Search Flow — Current vs Optimized</p>
+
+<!-- ===== CURRENT PIPELINE ===== -->
+<h2>Current Pipeline <span class="badge badge-red">SLOW — 15-25 min</span></h2>
+
+<div class="pipeline">
+  <div class="step">
+    <div class="step-dot" style="background:#2563eb20;border:1px solid #2563eb40">📝</div>
+    <div class="step-content">
+      <h3>User Input</h3>
+      <p>"Panel Surya Solar" — Jakarta, Indonesia</p>
+      <span class="step-time time-good">instant</span>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-dot" style="background:#7c3aed20;border:1px solid #7c3aed40">🧠</div>
+    <div class="step-content">
+      <h3>LLM Query Expansion</h3>
+      <p>Gemini generates 5 search queries</p>
+      <span class="step-time time-good">~10s</span>
+      <div class="step-issue">⚠ Queries terlalu generik → return blog posts, bukan vendor websites</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-dot" style="background:#22c55e20;border:1px solid #22c55e40">🔍</div>
+    <div class="step-content">
+      <h3>Web Search (Single Provider)</h3>
+      <p>Tavily search → 20-40 URLs</p>
+      <span class="step-time time-good">~5s</span>
+      <div class="step-issue">⚠ Hanya 1 provider, tidak ada pre-filter → blogs & news masuk</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-dot" style="background:#f9731620;border:1px solid #f9731640">📄</div>
+    <div class="step-content">
+      <h3>Scrape 30 URLs (Sequential)</h3>
+      <p>Jina Reader → fetch satu per satu, 60K chars each</p>
+      <span class="step-time time-bad">5-8 min ⚠</span>
+      <div class="step-issue">⚠ SEQUENTIAL — 30 URLs × 10-15s each. No parallel processing.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-dot" style="background:#ef444420;border:1px solid #ef444440">🤖</div>
+    <div class="step-content">
+      <h3>LLM Extract (1 call per URL)</h3>
+      <p>Gemini extracts vendor info — 30 separate API calls</p>
+      <span class="step-time time-bad">10-15 min ⚠⚠</span>
+      <div class="step-issue">⚠ BIGGEST BOTTLENECK — 30 calls × 20s each = 600 seconds. Most return "is_vendor: false"</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-dot" style="background:#eab30820;border:1px solid #eab30840">🏷️</div>
+    <div class="step-content">
+      <h3>Dedup + Score + Logo</h3>
+      <p>Merge duplicates, calculate scores, fetch logos</p>
+      <span class="step-time time-ok">30s-∞</span>
+      <div class="step-issue">⚠ Logo fetch (Clearbit) hangs if blocked by network — no timeout</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COMPARISON ===== -->
+<h2>Current vs Optimized</h2>
+<div class="compare">
+  <div class="compare-card bad">
+    <h3>❌ Current</h3>
+    <div class="stat"><span>Total Time</span><span class="stat-val red">15-25 min</span></div>
+    <div class="stat"><span>URLs Scraped</span><span class="stat-val">30 (sequential)</span></div>
+    <div class="stat"><span>LLM Calls</span><span class="stat-val red">30 calls</span></div>
+    <div class="stat"><span>Tokens Used</span><span class="stat-val">~1.8M tokens</span></div>
+    <div class="stat"><span>Vendors Found</span><span class="stat-val red">0-3 avg</span></div>
+    <div class="stat"><span>Cost per Search</span><span class="stat-val red">~$0.15</span></div>
+    <div class="stat"><span>Blog Pages Wasted</span><span class="stat-val red">60-80%</span></div>
+  </div>
+  <div class="compare-card good">
+    <h3>✅ Optimized</h3>
+    <div class="stat"><span>Total Time</span><span class="stat-val green">3-5 min</span></div>
+    <div class="stat"><span>URLs Scraped</span><span class="stat-val">15 (parallel ×5)</span></div>
+    <div class="stat"><span>LLM Calls</span><span class="stat-val green">5 calls (batch ×3)</span></div>
+    <div class="stat"><span>Tokens Used</span><span class="stat-val">~600K tokens</span></div>
+    <div class="stat"><span>Vendors Found</span><span class="stat-val green">5-15 avg</span></div>
+    <div class="stat"><span>Cost per Search</span><span class="stat-val green">~$0.05</span></div>
+    <div class="stat"><span>Blog Pages Wasted</span><span class="stat-val green">10-20%</span></div>
+  </div>
+</div>
+
+<!-- ===== OPTIMIZED PIPELINE ===== -->
+<h2>Optimized Pipeline <span class="badge badge-green">FAST — 3-5 min</span></h2>
+
+<div class="flow">
+  <div class="flow-row"><div class="flow-box fb-input">📝 User Input: "Panel Surya Solar" — Jakarta</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-row"><div class="flow-box fb-query">🧠 LLM: 8 Vendor-Focused Queries (10s)</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-row">
+    <div class="fb-parallel">
+      <div class="flow-box fb-search">🔍 Tavily Search</div>
+      <div class="flow-box fb-search">🔍 Serper Search</div>
+    </div>
+  </div>
+  <div class="flow-arrow">↓ 40+ URLs</div>
+  <div class="flow-row"><div class="flow-box fb-filter">🧹 Pre-Filter: Remove blogs, news, youtube → Keep 15 vendor URLs (instant)</div></div>
+  <div class="flow-arrow">↓ 15 URLs</div>
+  <div class="flow-row">
+    <div class="fb-parallel">
+      <div class="flow-box fb-scrape">📄 Scrape ×5</div>
+      <div class="flow-box fb-scrape">📄 Scrape ×5</div>
+      <div class="flow-box fb-scrape">📄 Scrape ×5</div>
+    </div>
+  </div>
+  <div class="flow-arrow">↓ 15 pages (parallel — 1 min total)</div>
+  <div class="flow-row">
+    <div class="fb-parallel">
+      <div class="flow-box fb-extract">🤖 Gemini: Extract batch 1 (3 pages)</div>
+      <div class="flow-box fb-extract">🤖 Gemini: Extract batch 2 (3 pages)</div>
+      <div class="flow-box fb-extract">🤖 ... batch 5</div>
+    </div>
+  </div>
+  <div class="flow-arrow">↓ 5 LLM calls instead of 30 (2 min total)</div>
+  <div class="flow-row"><div class="flow-box fb-output">✅ Dedup → Score → Logo (3s timeout) → 5-15 Vendors → Done!</div></div>
+</div>
+
+<!-- ===== QUERY STRATEGY ===== -->
+<h2>Query Strategy: Vendor-Focused</h2>
+<p style="font-size:0.85rem;color:#888;margin-bottom:12px">Contoh untuk "Panel Surya Solar, Jakarta":</p>
+
+<div class="queries">
+  <div class="query-item"><span class="tag tag-vendor">Vendor</span>"supplier panel surya Jakarta Indonesia"</div>
+  <div class="query-item"><span class="tag tag-price">Harga</span>"jual panel surya harga grosir 2025"</div>
+  <div class="query-item"><span class="tag tag-vendor">Company</span>"PT panel surya Indonesia company"</div>
+  <div class="query-item"><span class="tag tag-vendor">Distributor</span>"distributor solar panel Jakarta resmi"</div>
+  <div class="query-item"><span class="tag tag-b2b">B2B</span>"indotrading panel surya supplier"</div>
+  <div class="query-item"><span class="tag tag-vendor">Contact</span>"solar panel vendor Indonesia contact sales"</div>
+  <div class="query-item"><span class="tag tag-price">Compare</span>"perbandingan panel surya terbaik Indonesia"</div>
+  <div class="query-item"><span class="tag tag-intl">International</span>"solar panel manufacturer Indonesia export"</div>
+</div>
+
+<!-- ===== URL PRE-FILTER ===== -->
+<h2>URL Pre-Filter</h2>
+<div class="filter-grid">
+  <div class="filter-box filter-skip">
+    <h4 style="color:#ef4444">✕ Skip (bukan vendor)</h4>
+    <ul>
+      <li>youtube.com, tiktok.com</li>
+      <li>reddit.com, quora.com</li>
+      <li>medium.com, blogspot.com</li>
+      <li>wikipedia.org</li>
+      <li>tribunnews.com, kompas.com, detik.com</li>
+      <li>instagram.com, facebook.com</li>
+      <li>linkedin.com/posts (bukan company)</li>
+    </ul>
+  </div>
+  <div class="filter-box filter-keep">
+    <h4 style="color:#22c55e">✓ Keep (likely vendor)</h4>
+    <ul>
+      <li>*.co.id, *.com company domains</li>
+      <li>indotrading.com, ralali.com</li>
+      <li>tokopedia.com/shop/*</li>
+      <li>URLs with /products, /pricing, /contact</li>
+      <li>alibaba.com listings</li>
+      <li>bukalapak.com/u/*</li>
+      <li>URLs matching company name patterns</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== BATCH EXTRACTION ===== -->
+<h2>Batch Extraction: 3 Pages per LLM Call</h2>
+
+<div class="batch-diagram">
+  <div class="batch-group">
+    <div class="batch-pages">
+      <div class="batch-page">P1</div>
+      <div class="batch-page">P2</div>
+      <div class="batch-page">P3</div>
+    </div>
+    <div class="batch-label">Batch 1</div>
+  </div>
+  <div class="batch-arrow">→</div>
+  <div class="batch-llm">🤖 Gemini Call #1</div>
+  <div class="batch-arrow">→</div>
+  <div class="batch-group">
+    <div class="batch-pages">
+      <div class="batch-page" style="background:#22c55e20;border-color:#22c55e40;color:#22c55e">V1</div>
+      <div class="batch-page" style="background:#22c55e20;border-color:#22c55e40;color:#22c55e">V2</div>
+      <div class="batch-page" style="background:#ef444420;border-color:#ef444440;color:#ef4444">✕</div>
+    </div>
+    <div class="batch-label">2 vendors, 1 non-vendor</div>
+  </div>
+</div>
+
+<div style="text-align:center;margin:12px 0">
+  <span style="font-size:0.8rem;color:#666">Current: 30 calls × 20s = </span>
+  <span style="font-size:0.9rem;color:#ef4444;font-weight:600">600s</span>
+  <span style="font-size:0.8rem;color:#666"> → Optimized: 5 calls × 30s = </span>
+  <span style="font-size:0.9rem;color:#22c55e;font-weight:600">150s</span>
+  <span style="font-size:0.8rem;color:#22c55e;font-weight:600"> (4× faster)</span>
+</div>
+
+<!-- ===== IMPACT ===== -->
+<h2>Expected Impact</h2>
+<div class="impact">
+  <div class="impact-card">
+    <div class="val" style="color:#22c55e">4×</div>
+    <div class="label">Faster Search</div>
+    <div class="change" style="background:#22c55e15;color:#22c55e">15min → 4min</div>
+  </div>
+  <div class="impact-card">
+    <div class="val" style="color:#22c55e">5×</div>
+    <div class="label">More Vendors</div>
+    <div class="change" style="background:#22c55e15;color:#22c55e">0-3 → 5-15</div>
+  </div>
+  <div class="impact-card">
+    <div class="val" style="color:#eab308">3×</div>
+    <div class="label">Less Cost</div>
+    <div class="change" style="background:#eab30815;color:#eab308">$0.15 → $0.05</div>
+  </div>
+  <div class="impact-card">
+    <div class="val" style="color:#ef4444">80%</div>
+    <div class="label">Less Waste</div>
+    <div class="change" style="background:#ef444415;color:#ef4444">blogs filtered out</div>
+  </div>
+</div>
+
+<div style="text-align:center;margin:48px 0 24px;padding:24px;background:#22c55e08;border:1px solid #22c55e20;border-radius:12px">
+  <p style="font-size:1.1rem;font-weight:600;color:#22c55e">Ready to implement?</p>
+  <p style="font-size:0.85rem;color:#888;margin-top:4px">4 code changes — no infrastructure needed</p>
+</div>
+
+</div>
+</body>
+</html>

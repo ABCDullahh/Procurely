@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.local
+.env.production
+.credentials-local.txt
+
+# Claude Code artifacts
+.claude/
+
+# Database
+*.db
+*.sqlite
+
+# Build
+dist/
+.next/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+server.log
+server_err.log
+pipeline_debug.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.pytest_cache/
+.ruff_cache/
+.crawl4ai/
+
+# Test artifacts
+*.jpeg
+*.png
+!icon-logo.png
+!showcase/*.jpg
+playwright-report/
+.playwright-mcp/

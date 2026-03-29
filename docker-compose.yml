@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: procurely-db
+    environment:
+      POSTGRES_USER: procurely
+      POSTGRES_PASSWORD: procurely_dev_password
+      POSTGRES_DB: procurely
+    ports:
+      - "5947:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U procurely"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: procurely-redis
+    ports:
+      - "6847:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Crawl4AI - Self-hosted web crawler with JavaScript rendering
+  # Used for scraping websites that require JS execution
+  crawl4ai:
+    image: unclecode/crawl4ai:latest
+    container_name: procurely-crawl4ai
+    ports:
+      - "11847:11235"
+    environment:
+      - CRAWL4AI_API_TOKEN=${CRAWL4AI_TOKEN:-}
+    volumes:
+      - crawl4ai_cache:/root/.crawl4ai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11235/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  crawl4ai_cache:
