@@ -13,6 +13,10 @@ __pycache__/
 # Claude Code artifacts
 .claude/
 
+# Deployment docs (local only)
+DEPLOYMENT.md
+deployment-*.md
+
 # Database
 *.db
 *.sqlite
