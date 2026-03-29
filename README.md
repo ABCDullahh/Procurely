@@ -122,7 +122,8 @@ Each vendor receives three scores:
 - **HTML Reports** - Generate shareable procurement reports
 - **Copilot** - Context-aware assistant for each request
 - **Admin Panel** - Manage API keys and view audit logs
-- **Dark Mode** - Full theme support
+- **Rate Limiting** - 200 LLM requests/day global cap + per-IP limits
+- **Security Headers** - X-Content-Type-Options, X-Frame-Options, HSTS, etc.
 
 ---
 
@@ -358,19 +359,14 @@ erDiagram
 
 ### Environment Variables
 
-Create `.env` in the backend directory:
+Copy `.env.example` to `backend/.env` and fill in your values:
 
-```env
-DATABASE_URL=postgresql://user:pass@localhost:5432/procurely
-APP_MASTER_KEY=your-32-byte-hex-key
-JWT_SECRET_KEY=your-jwt-secret
-
-# Optional: Set via Admin panel instead
-OPENAI_API_KEY=sk-...
-GEMINI_API_KEY=...
-SERPER_API_KEY=...
-TAVILY_API_KEY=...
+```bash
+cp .env.example backend/.env
+# Edit backend/.env with your database URL, secrets, and admin credentials
 ```
+
+API keys for search providers (OpenAI, Gemini, Serper, Tavily) can be configured via the Admin Panel after login.
 
 ### Installation
 
@@ -445,7 +441,8 @@ Procurely/
 - [x] DeepResearch with iterative gap analysis
 - [x] Shortlists and HTML reports
 - [x] Admin panel for API key management
-- [x] Dark mode support
+- [x] API rate limiting and usage quotas (200 LLM/day)
+- [x] Security hardening (headers, CORS, strong credentials)
 
 ### In Progress
 
@@ -460,7 +457,6 @@ Procurely/
 - [ ] Team collaboration features
 - [ ] Vendor contact outreach integration
 - [ ] Custom scoring criteria builder
-- [ ] API rate limiting and usage quotas
 - [ ] Webhook integrations
 - [ ] Mobile responsive improvements
 
