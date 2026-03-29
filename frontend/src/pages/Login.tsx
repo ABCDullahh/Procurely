@@ -133,6 +133,15 @@ export function Login() {
                             </Button>
 
                         </form>
+                        <p className="text-center text-sm text-[#A09A93] mt-4">
+                            Need an account?{' '}
+                            <a
+                                href="mailto:faizal2jz@gmail.com"
+                                className="text-[#1A1816] underline hover:text-crimson-600 transition-colors"
+                            >
+                                Contact admin
+                            </a>
+                        </p>
                     </CardContent>
                 </Card>
             </motion.div>
