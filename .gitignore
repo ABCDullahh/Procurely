@@ -10,12 +10,20 @@ __pycache__/
 .env.production
 .credentials-local.txt
 
-# Claude Code artifacts
+# Local tool config
 .claude/
 
-# Deployment docs (local only)
+# Deployment & dev notes (local only)
 DEPLOYMENT.md
 deployment-*.md
+gap-analysis.md
+progress.md
+tasks.md
+new-task.md
+new-progress.md
+qa-review.md
+mockup-*.html
+pipeline-analysis.html
 
 # Database
 *.db
@@ -44,6 +52,12 @@ Thumbs.db
 .pytest_cache/
 .ruff_cache/
 .crawl4ai/
+
+# Build artifacts
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+tsc-errors.txt
 
 # Test artifacts
 *.jpeg

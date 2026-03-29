@@ -1261,7 +1261,7 @@ export default function LandingPage() {
                                 className="w-full rounded-xl font-semibold shadow-none"
                                 style={{ background: 'var(--lp-text-1)', color: '#fff' }}
                             >
-                                <a href="mailto:hello@procurely.app">Contact us</a>
+                                <a href="mailto:faizal2jz@gmail.com">Contact us</a>
                             </Button>
                         </div>
                     </div>

@@ -342,7 +342,7 @@ export function NewRequestPage() {
                                         <p className="text-xs text-amber-700 mt-1">
                                             Free tier allows 1 search only.{' '}
                                             <a
-                                                href="mailto:hello@procurely.app"
+                                                href="mailto:faizal2jz@gmail.com"
                                                 className="underline font-medium hover:text-amber-900"
                                             >
                                                 Contact us
