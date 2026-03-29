@@ -1,0 +1,289 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* === Brand Palette (Minimal Editorial + Warm Premium) === */
+    --crimson: 354 84% 43%;
+    /* #C8102E */
+    --rose: 349 91% 64%;
+    /* #F75270 */
+    --blush: 30 25% 94%;
+    /* warm neutral tint */
+    --cream: 40 33% 97%;
+    /* #FAF9F7 */
+
+    /* === Semantic Tokens (Light Mode - Warm Premium) === */
+    --background: 40 33% 97%;
+    /* #FAF9F7 warm neutral */
+    --foreground: 30 12% 9%;
+    /* #1A1816 primary text */
+    --card: 0 0% 100%;
+    /* Pure white cards */
+    --card-foreground: 30 12% 9%;
+    /* #1A1816 */
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 12% 9%;
+
+    /* Primary = Dark (#1A1816) for buttons */
+    --primary: 30 12% 9%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary = Light warm neutral */
+    --secondary: 30 18% 95%;
+    --secondary-foreground: 30 12% 9%;
+
+    /* Muted = Warm gray */
+    --muted: 30 15% 95%;
+    --muted-foreground: 25 5% 40%;
+    /* #6B6560 */
+
+    /* Accent = Light crimson tint for active states */
+    --accent: 354 84% 97%;
+    --accent-foreground: 354 84% 43%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 30 18% 90%;
+    /* #ECE8E1 */
+    --input: 30 18% 90%;
+    --ring: 354 84% 43%;
+
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* Shadows (warm-tinted, minimal) */
+    --shadow-color: 30 15% 50%;
+
+    /* Tertiary text */
+    --tertiary: 25 4% 61%;
+    /* #A09A93 */
+  }
+
+  /* Dark theme removed — light-only design */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Display Typography */
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+  }
+
+  /* Focus ring styling */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+
+  /* === Grain Overlay (Paper Texture) === */
+  .grain-overlay {
+    position: relative;
+  }
+
+  .grain-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    z-index: 1;
+  }
+
+  .grain-overlay>* {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* === Editorial Card === */
+  .card-editorial {
+    @apply bg-card border border-border rounded-xl;
+    box-shadow: none;
+  }
+
+  .card-editorial:hover {
+    box-shadow: 0 2px 8px hsl(var(--shadow-color) / 0.06);
+  }
+
+  /* === Editorial Button Variants === */
+  .btn-editorial {
+    @apply font-medium tracking-wide transition-all duration-200;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .btn-editorial:active {
+    transform: scale(0.98);
+  }
+
+  /* === Crimson Gradient === */
+  .gradient-crimson {
+    background: linear-gradient(135deg, hsl(var(--crimson)) 0%, hsl(var(--rose)) 100%);
+  }
+
+  .gradient-blush {
+    background: linear-gradient(135deg, hsl(var(--blush)) 0%, hsl(var(--cream)) 100%);
+  }
+
+  /* === Brand Gradient (for sidebar logo, avatars) === */
+  .gradient-brand {
+    background: hsl(var(--crimson));
+  }
+
+  /* === Glass Card === */
+  .glass-card {
+    @apply bg-card border border-border;
+  }
+
+  /* === Score badges === */
+  .score-high {
+    @apply bg-emerald-100 text-emerald-800;
+  }
+
+  .score-medium {
+    @apply bg-amber-100 text-amber-800;
+  }
+
+  .score-low {
+    background: hsl(var(--blush));
+    color: hsl(var(--crimson));
+  }
+
+  /* === Interactive states === */
+  .interactive {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .interactive:hover {
+    @apply transform -translate-y-0.5;
+  }
+
+  /* === Skeleton loader === */
+  .skeleton {
+    @apply rounded animate-pulse;
+    background: linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(var(--border) / 0.5) 50%, hsl(var(--muted)) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+  }
+
+  @keyframes skeleton-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* === Empty State Illustration Style === */
+  .empty-illustration {
+    @apply mx-auto;
+    max-width: 200px;
+  }
+
+  .empty-illustration svg {
+    stroke: hsl(var(--muted-foreground));
+    fill: hsl(var(--muted) / 0.5);
+  }
+}
+
+@layer utilities {
+
+  /* === Custom Scrollbar (Warm) === */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.5);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* === Text Selection === */
+  ::selection {
+    background: hsl(var(--crimson) / 0.15);
+    color: hsl(var(--crimson));
+  }
+
+  /* === Editorial Link === */
+  .link-editorial {
+    @apply underline underline-offset-4 decoration-1 decoration-current/40 hover:decoration-current transition-all;
+  }
+
+  /* === Staggered Animation Utility === */
+  .animate-stagger>* {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: stagger-in 0.5s ease-out forwards;
+  }
+
+  .animate-stagger>*:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  .animate-stagger>*:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .animate-stagger>*:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .animate-stagger>*:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+
+  .animate-stagger>*:nth-child(5) {
+    animation-delay: 0.5s;
+  }
+
+  .animate-stagger>*:nth-child(6) {
+    animation-delay: 0.6s;
+  }
+
+  @keyframes stagger-in {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
